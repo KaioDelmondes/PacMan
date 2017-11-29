@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layout>
+	<Files>
+		<File Name="main.cpp" Top="Yes" Tabpos="1" TopLine="830">
+			<Cursor Line="830" Column="20"/>
+		</File>
+		<File Name="mapa.h" Top="No" Tabpos="2" TopLine="1">
+			<Cursor Line="6" Column="14"/>
+		</File>
+		<File Name="pacman.h" Top="No" Tabpos="3" TopLine="155">
+			<Cursor Line="174" Column="26"/>
+		</File>
+		<File Name="fantasma.h" Top="No" Tabpos="4" TopLine="212">
+			<Cursor Line="226" Column="18"/>
+		</File>
+	</Files>
+</Layout>

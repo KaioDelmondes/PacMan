@@ -23,11 +23,12 @@ Pacman *criaPacman() {
 	
 	pac->vidas = PAC_VIDAS;
 	pac->pontos = 0;
-	pac->fase = 1;
+	pac->fase = 0;
 	pac->morto = 0;
 	pac->capturados = 0;
-	pac->direcao = PAC_DIRECAO_DIREITA;
-	pac->pre = PAC_DIRECAO_DIREITA;
+	//direita
+	pac->direcao = 3;
+	pac->pre = 3;
 	pac->boca = 0;
 	pac->mov = 0;
 	pac->velocidade = 0;
@@ -77,7 +78,7 @@ void movePacman(Pacman *pac, Mapa *map, Fantasma *fant) {
 			pac->boca = PAC_BOCA_MAX * pac->mov;
 		} else {
 			// Atualiza a pontuação
-			if (pac->destino->bolinha != PAC_BOLINHA_NENHUMA)
+			if (pac->destino->bolinha == PAC_BOLINHA_NORMAL || pac->destino->bolinha == PAC_BOLINHA_ESPECIAL)
 				map->bolinhas--;
 			switch (pac->destino->bolinha) {
 				case PAC_BOLINHA_NORMAL:
@@ -95,7 +96,7 @@ void movePacman(Pacman *pac, Mapa *map, Fantasma *fant) {
 					}
 					break;
 			}
-		//	pac->destino->bolinha = PAC_BOLINHA_NENHUMA;
+		
 			pac->destino->bolinha = 3;
 			
 			// Atualiza a posição
@@ -119,16 +120,16 @@ void mostrarPacman(Pacman *pac, double interpolacao) {
 	double delta = min(1.0, pac->mov + pac->velocidade * interpolacao);
 	
 	switch (pac->direcao) {
-		case PAC_DIRECAO_CIMA:
+		case 0:
 			posY -= delta;
 			break;
-		case PAC_DIRECAO_ESQUERDA:
+		case 1:
 			posX -= delta;
 			break;
-		case PAC_DIRECAO_BAIXO:
+		case 2:
 			posY += delta;
 			break;
-		case PAC_DIRECAO_DIREITA:
+		case 3:
 			posX += delta;
 			break;
 	}
@@ -167,10 +168,10 @@ double velocidadePacman(Pacman *pac) {
 int pacmanPodeAndarSobre(Tile *tile) {
 	return tile != 0
 		   && tile->tipo != PAC_PAREDE
-		   && tile->tipo != PAC_BLINKY
-		   && tile->tipo != PAC_PINKY
-		   && tile->tipo != PAC_INKY
-		   && tile->tipo != PAC_CLYDE
+		   && tile->tipo != Fantasma1_pac
+		   && tile->tipo != Fantasma2_pac
+		   && tile->tipo != Fantasma3_pac
+		   && tile->tipo != Fantasma4_pac
 		   && tile->tipo != PAC_NADA;
 }
 

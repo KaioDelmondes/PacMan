@@ -17,14 +17,20 @@
 #define PAC_MAPA_ALTURA 21
 #define PAC_MAPA_LARGURA 19
 
+// Tipos de fantasmas
+#define Fantasma1 0
+#define Fantasma2 1
+#define Fantasma3 2
+#define Fantasma4 3
+
 // posições dos elementos do pacman
 #define PAC_CAMINHO 0
 #define PAC_PAREDE 1
 #define PAC_TELETRANSPORTE 2
-#define PAC_BLINKY 3
-#define PAC_PINKY 4
-#define PAC_INKY 5
-#define PAC_CLYDE 6
+#define Fantasma1_pac 3
+#define Fantasma2_pac 4
+#define Fantasma3_pac 5
+#define Fantasma4_pac 6
 #define PAC_PACMAN 7
 #define PAC_NADA 9
 
@@ -33,20 +39,10 @@
 #define PAC_BOLINHA_NORMAL 1
 #define PAC_BOLINHA_ESPECIAL 2
 
-// Direções de movimento
-#define PAC_DIRECAO_CIMA 0
-#define PAC_DIRECAO_ESQUERDA 1
-#define PAC_DIRECAO_BAIXO 2
-#define PAC_DIRECAO_DIREITA 3
-
 // Quantidade de Fantasmas
 #define PAC_FANTASMAS 4
 
-// Tipos de fantasmas
-#define Fantasma1 0
-#define Fantasma2 1
-#define Fantasma3 2
-#define Fantasma4 3
+
 
 // Estados dos fantasmas
 #define PAC_ESTADO_ESPALHAR 0

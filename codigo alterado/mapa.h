@@ -82,25 +82,25 @@ Mapa *criaMapa(int tipos[][PAC_MAPA_LARGURA], int bolinhas[][PAC_MAPA_LARGURA], 
 				glColor3f(0.3, 0, 0.1);
 				desenhaQuadrado(1);
 				break;
-			case PAC_BLINKY:
+			case Fantasma1_pac:
 				glColor3f(0, 0, 0);
 				desenhaQuadrado(1);
 				fant[Fantasma1].atual = &map->tiles[j][i];
 				fant[Fantasma1].inicio = &map->tiles[j][i];
 				break;
-			case PAC_PINKY:
+			case Fantasma2_pac:
 				glColor3f(0, 0, 0);
 				desenhaQuadrado(1);
 				fant[Fantasma2].atual = &map->tiles[j][i];
 				fant[Fantasma2].inicio = &map->tiles[j][i];
 				break;
-			case PAC_INKY:
+			case Fantasma3_pac:
 				glColor3f(0, 0, 0);
 				desenhaQuadrado(1);
 				fant[Fantasma3].atual = &map->tiles[j][i];
 				fant[Fantasma3].inicio = &map->tiles[j][i];
 				break;
-			case PAC_CLYDE:
+			case Fantasma4_pac:
 				glColor3f(0, 0, 0);
 				desenhaQuadrado(1);
 				fant[Fantasma4].atual = &map->tiles[j][i];
@@ -193,7 +193,7 @@ void reiniciarMapa(Mapa *map, int bolinhas[][PAC_MAPA_LARGURA])
 		for (i = 0; i < PAC_MAPA_LARGURA; i++)
 		{
 			map->tiles[j][i].bolinha = bolinhas[j][i];
-			if (bolinhas[j][i] != PAC_BOLINHA_NENHUMA)
+			if (bolinhas[j][i] == PAC_BOLINHA_NORMAL || bolinhas[j][i] == PAC_BOLINHA_ESPECIAL)
 				map->bolinhas++;
 		}
 	}
@@ -214,16 +214,20 @@ Tile *proximoTile(Mapa *map, Tile *tile, int direcao, int tele)
 		// Procura o próximo
 		switch (direcao)
 		{
-		case PAC_DIRECAO_CIMA:
+			//para cima
+		case 0:
 			if (tile->pos[Y] == 0) return 0;
 			return &map->tiles[tile->pos[Y] - 1][tile->pos[X]];
-		case PAC_DIRECAO_DIREITA:
+		//direita
+		case 3:
 			if (tile->pos[X] == PAC_MAPA_LARGURA - 1) return 0;
 			return &map->tiles[tile->pos[Y]][tile->pos[X] + 1];
-		case PAC_DIRECAO_BAIXO:
+		//baixo
+		case 2:
 			if (tile->pos[Y] == PAC_MAPA_ALTURA - 1) return 0;
 			return &map->tiles[tile->pos[Y] + 1][tile->pos[X]];
-		case PAC_DIRECAO_ESQUERDA:
+		//esquerda
+		case 1:
 			if (tile->pos[X] == 0) return 0;
 			return &map->tiles[tile->pos[Y]][tile->pos[X] - 1];
 		}
@@ -252,10 +256,10 @@ Tile *proximoTileEm(int passos, Mapa *map, Tile *tile, int direcao)
 int ePrisao(Tile *tile)
 {
 	return tile != 0
-		   && (tile->tipo == PAC_BLINKY
-			   || tile->tipo == PAC_PINKY
-			   || tile->tipo == PAC_INKY
-			   || tile->tipo == PAC_CLYDE);
+		   && (tile->tipo == Fantasma1_pac
+			   || tile->tipo == Fantasma2_pac
+			   || tile->tipo == Fantasma3_pac
+			   || tile->tipo == Fantasma4_pac);
 }
 
 // Calcula a distância entre 2 tiles

@@ -30,10 +30,13 @@
 	<AppType Value="GUI"/>
 	<Files>
 		<File Name="main.cpp"/>
-		<File Name="global.h"/>
 		<File Name="mapa.h"/>
 		<File Name="pacman.h"/>
 		<File Name="fantasma.h"/>
+		<File Name="defines.h"/>
+		<File Name="struct.h"/>
+		<File Name="matrizes.h"/>
+		<File Name="funcoes.h"/>
 	</Files>
 	<AppIcon>
 		0000010001003030000001002000A82500001600000028000000300000006000

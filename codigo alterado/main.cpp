@@ -15,7 +15,7 @@
 #include "pacman.h"
 #include "fantasma.h"
 
- 
+
 //unsigned é usado para retornar valores sempre positivos
 unsigned int tempoInicial;
 unsigned int tempoAtual;
@@ -33,9 +33,10 @@ Fantasma *ghost;//declara uma variavel fantasma
 Mapa *map; // declara uma variavel fantasma
 char pontuacao[8]; //variaveis adicionais
 char vidas[8]; //variaveis adicionais
+char nivel[8];//variaveis adicionais
 char pontuacaoRecorde[8]; //variaveis adicionais
 
-int menu = 1,op = 0,pause = 0,inicio = 1,morto = 0,fim = 0;
+int menu = 1, op = 0, pause = 0, inicio = 1, morto = 0, fim = 0;
 
 int main()
 {
@@ -49,21 +50,20 @@ int main()
 	inicializacao();
 
 	//Funções ativadas no decorrer da execução
-	glutDisplayFunc(desenhar);
-	glutSpecialFunc(mover);
+	glutDisplayFunc(constroiTela);
+	glutSpecialFunc(moveCursor);
 	glutKeyboardFunc(teclado);
 	glutReshapeFunc(redimensionar);//muda tamanho da tela
 
 	glutMainLoop();
 }
 
-
 void inicializacao()
 {
 	// Cria os objetos do jogo
 	pac = criaPacman();
 	ghost = criaFantasmas();
-	//no mapa são carregadas duas matrizes uma com a posição dos elementos e a outa com a 
+	//no mapa são carregadas duas matrizes uma com a posição dos elementos e a outa com a
 	//opcao das bolinhas
 	map = criaMapa(MPosicao, PBolinhas, pac, ghost);
 
@@ -82,11 +82,11 @@ void inicializacao()
 	//srand(tempoInicial);
 	srand(tempoInicial);
 
-	glutTimerFunc(PAC_TIMER, mudarEstado, 5000);
+	glutTimerFunc(PAC_TIMER, mudarEstadoFantasma, 5000);
 }
 
-// Exibe a imagem atual na tela
-void desenhar()
+// Exibe a imagem na tela
+void constroiTela()
 {
 	// Limpa a tela e todos os bits
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -96,23 +96,19 @@ void desenhar()
 	glLoadIdentity();
 	glViewport(0, 0, Largura, Altura);
 
-	// Utiliza a projeção ortográfica
+	//posiciona tela
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho((double) - Largura / 2, (double) Largura / 2, (double) - Altura / 2, (double) Altura / 2, -2000, 2000);
-
-
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
 	if (menu)
-	{
-		// Desenha o menu
-		mostrarMenu();
-	}
+		// Constroi menu principal
+		Menu();
 	else
 	{
-		// Desenha o jogo
+		// Constroi tela do jogo
 		atualizarJogo();
 		mostrarJogo();
 	}
@@ -121,14 +117,9 @@ void desenhar()
 	glutPostRedisplay();
 }
 
-// Monta o menu do jogo
-void mostrarMenu()
+// Exibe imagem de fundo
+void montaFundo()
 {
-	int i;
-	char itens[4][21];
-	char controles[3][34];
-
-	// Exibe imagem de fundo
 	glEnable(GL_TEXTURE_2D);
 	glBegin(GL_QUADS);
 	glTexCoord2f(0, 0);
@@ -141,60 +132,70 @@ void mostrarMenu()
 	glVertex3f((double) Largura / 2, (double) - Altura / 2, 0);
 	glEnd();
 	glDisable(GL_TEXTURE_2D);
-
-	// Exibe o texto
+}
+// Monta o menu do jogo
+void Menu()
+{
+	char item[4][20];
+	char sobre[3][30];
+	montaFundo();
+	// Imprimi o texto
 	switch (menu)
 	{
-	case 1: // Tela principal
+	case 1:
 		if (pause)
 		{
-			strcpy(itens[0], "Continuar Jogo");
-			strcpy(itens[1], "Sobre");
-			strcpy(itens[2], "Sair");
-			strcpy(itens[3], "Menu inicial");
+			//Submenu
+			strcpy(item[0], "Continuar Jogo");
+			strcpy(item[1], "Sobre");
+			strcpy(item[2], "Sair");
+			strcpy(item[3], "Menu inicial");
+			for (int i = 0; i < 4; i++)
+			{
+				double yy = (double) Altura / 2 + 25 * i + 40;
+				escreveTela(item[i], 0, yy, 0, op == i);
+			}
 		}
 		else
 		{
-			strcpy(itens[0], "Iniciar Jogo");
-			strcpy(itens[1], "Sobre");
-			strcpy(itens[2], "Sair");
+			//Menu principal
+			strcpy(item[0], "Iniciar Jogo");
+			strcpy(item[1], "Sobre");
+			strcpy(item[2], "Sair");
+			for (int i = 0; i < 3; i++)
+			{
+				double yy = (double) Altura / 2 + 25 * i + 40;
+				escreveTela(item[i], 0, yy, 0, op == i);
+			}
 		}
-		// Desenha os ítens
-		for (i = 0; i < 4; i++)
-			escreveTela(itens[i], 0, (double) Altura / 2 + 25 * i + 40, 0, op == i);
-
-		// Desenha a pontuação recorde
-		itoa(maiorPontuacao, pontuacaoRecorde, 10);
-		escreveTela("pontuacaoRecorde", 20 + 3 * 9, 20, 1, 0);
-		escreveTela(pontuacaoRecorde, 20, 35, 1, 0);
 		break;
-	case 2: // Sobre
-		strcpy(controles[0], "Autores: Elineide e Kaio");
-		strcpy(controles[1], "Setas: Movimentacao do PacMan");
-		strcpy(controles[2], "Enter: Continua (ou pausa) o jogo");
-		strcpy(controles[3], "Esc: voltar");
 
-		for (i = 0; i < 4; i++)
-			escreveTela(controles[i], (double) Largura / 2 - 30 * 8, (double) Altura / 2 + 20 * (i - 0.5), -1, 0);
+	case 2: // Sobre o jogo
+		strcpy(sobre[0], "Autores: Elineide e Kaio");
+		strcpy(sobre[1], "Setas: Movimentacao do PacMan");
+		strcpy(sobre[2], "Enter: Continua (ou pausa) o jogo");
+		strcpy(sobre[3], "Esc: voltar");
+
+		for (int i = 0; i < 4; i++)
+		{
+			double xx = (double) Largura / 2 - 30 * 8;
+			double yy = (double) Altura / 2 + 20 * (i - 0.5);
+			escreveTela(sobre[i], xx , yy, -1, 0);
+		}
 		break;
-	default://Sair
-		exit(0);
 	}
 }
 
-// Atualiza o jogo um passo
+// Atualiza o jogo a cada passo
 void atualizarJogo()
 {
-	//int i;
 	tempoAtual = glutGet(GLUT_ELAPSED_TIME);
 	passos = 0;
-
 	if (!pause)
 	{
 		// Atualiza o jogo, se não estiver pausado
 
-		while (tempoAtual - tempoInicial > frame
-				&& passos < PAC_PULOS_MAX)
+		while (tempoAtual - tempoInicial > frame && passos < PAC_PULOS_MAX)
 		{
 			// Verifica se ainda restam bolinhas
 			if (map->bolinhas)
@@ -204,14 +205,15 @@ void atualizarJogo()
 				{
 					pac->boca = 30;
 					glutTimerFunc(PAC_TIMER, iniciou, 2000);
-					// Se perdeu uma vida, espera
 				}
+				//se continua o jogo, verifica de o pac já morreu
 				else if (pac->morto && !morto)
 				{
 					morto = 1;
 					glutTimerFunc(PAC_TIMER, morreu, 2000);
-					// Se está normal, dá um passo
+
 				}
+				//se o pac não está morto e nem terminou então move pacman
 				else if (!pac->morto && !fim)
 				{
 					movePacman(pac, map, ghost);
@@ -226,14 +228,14 @@ void atualizarJogo()
 			{
 				map->bolinhas = -1;
 				fim = 1;
-				glutTimerFunc(PAC_TIMER, passou, 2000);
+				niveis = pac->fase;
+				glutTimerFunc(PAC_TIMER, passarFase, 2000);
 			}
 
 			tempoInicial += frame;
 			tempoAtual = glutGet(GLUT_ELAPSED_TIME);
 			passos++;
 		}
-
 		if ((tempoAtual - tempoInicial) > frame)
 			tempoInicial = tempoAtual - frame;
 
@@ -246,25 +248,29 @@ void atualizarJogo()
 	}
 }
 
-// Monta a cena atual do jogo
+// Monta a cena do jogo de forma atualizada
 void mostrarJogo()
 {
 	// Exibe a pontuação atual e o recorde
 	itoa(pac->pontos, pontuacao, 10);
 	itoa(pac->vidas, vidas, 10);
 	itoa(maiorPontuacao, pontuacaoRecorde, 10);
+	itoa(niveis, nivel, 10);
 	escreveTela("Pontos", 20, 20, -1, 0);
 	escreveTela(pontuacao, 20 + (10 - strlen(pontuacao)) * 9, 35, -1, 0);
 	escreveTela("Vidas", 20 + 12 * 9, 20, -1, 0);
 	escreveTela(vidas, 20 + 12 * 9 + (10 - strlen(vidas)) * 9, 35, -1, 0);
+	itoa(niveis, nivel, 10);
+	escreveTela("Nivel", 0 + 3 * 9, 15, 0, 0);
+	escreveTela(nivel, 10, 35, 0, 0);
 	escreveTela("pontuacaoRecorde", 20 + 3 * 9, 20, 1, 0);
 	escreveTela(pontuacaoRecorde, 20, 35, 1, 0);
 
-	// Informa quando está pausado
+	// Exibe mensagem quando pausado
 	if (pause)
 		escreveTela("Pausado", 0, Altura / 2 - 50, 0, 0);
 
-	// Posição da câmera
+	// Posição câmera
 	glRotated(35, 1, 0, 0);
 	glRotated(-45, 0, 1, 0);
 	glRotated(-90, 1, 0, 0);
@@ -273,9 +279,7 @@ void mostrarJogo()
 	// Se está morto, mover apenas os fantasmas
 	if (morto || fim)
 	{
-		centralizarCamera(pac, 0);
-
-
+		posicionarCamera(pac, 0);
 		mostrarMapa(map);
 		mostrarPacman(pac, 0);
 
@@ -287,19 +291,18 @@ void mostrarJogo()
 	}
 	else
 	{
-		centralizarCamera(pac, interpolacao);
-
+		posicionarCamera(pac, interpolacao);
 		mostrarMapa(map);
 		mostrarPacman(pac, interpolacao);
 		mostrarFantasmas(ghost, interpolacao);
 	}
-
+//-------------------------- Monta miniatura-------------------------------
 	// Miniatura
 	glMatrixMode(GL_VIEWPORT);
 	glLoadIdentity();
 	glViewport(10, 10, (PAC_MAPA_LARGURA + 1)*PAC_TAMANHO_MINIATURA, (PAC_MAPA_ALTURA + 1)*PAC_TAMANHO_MINIATURA);
 
-	// Posição da câmera na miniatura
+	// Posição da câmera em miniatura
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(0, PAC_MAPA_LARGURA + 1, 0, PAC_MAPA_ALTURA + 1, -600, 600);
@@ -307,23 +310,19 @@ void mostrarJogo()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glTranslated(0, 0, 400);
-
-	// Se está morto, mover apenas os fantasmas
+//------------------------------------------------------------------------
 
 	mostrarMapa(map);
 	if (morto)
-	{
-		mostrarPacman(pac, 0);
-	}
+		mostrarPacman(pac, 0); //sem mover pac
 	else
-	{
-		mostrarPacman(pac, interpolacao);
-	}
-	mostrarFantasmas(ghost, interpolacao);
+		mostrarPacman(pac, interpolacao); //mostra pac com movmentação
+
+	mostrarFantasmas(ghost, interpolacao); //fantasmas sempre se movem
 }
 
 // Atualiza a posição da câmera, centralizando-a no pac-man
-void centralizarCamera(Pacman *pac, double interpolacao)
+void posicionarCamera(Pacman *pac, double interpolacao)
 {
 	double posX = pac->atual->pos[X];
 	double posY = pac->atual->pos[Y];
@@ -332,16 +331,20 @@ void centralizarCamera(Pacman *pac, double interpolacao)
 	// Aplica a interpolação
 	switch (pac->direcao)
 	{
-	case PAC_DIRECAO_CIMA:
+		//para cima
+	case 0:
 		posY -= delta;
 		break;
-	case PAC_DIRECAO_ESQUERDA:
+		//para esquerda
+	case 1:
 		posX -= delta;
 		break;
-	case PAC_DIRECAO_BAIXO:
+		//para baixo
+	case 2:
 		posY += delta;
 		break;
-	case PAC_DIRECAO_DIREITA:
+		//para direita
+	case 3:
 		posX += delta;
 		break;
 	}
@@ -351,7 +354,7 @@ void centralizarCamera(Pacman *pac, double interpolacao)
 }
 
 // Reinicia o mapa e os personagens
-void reiniciarJogo()
+void reiniciaJogo()
 {
 	pac->vidas = PAC_VIDAS;
 	pac->pontos = 0;
@@ -372,7 +375,7 @@ void reiniciar(Pacman *pac, Fantasma *ghost)
 	for (i = 0; i < PAC_FANTASMAS; i++)
 	{
 		ghost[i].capturado = PAC_CAPTURA_PRISAO;
-		ghost[i].direcao = PAC_DIRECAO_CIMA;
+		ghost[i].direcao = 0;
 		ghost[i].mov = 0;
 		ghost[i].velocidade = 0;
 		ghost[i].tele = 0;
@@ -382,8 +385,8 @@ void reiniciar(Pacman *pac, Fantasma *ghost)
 	}
 
 	// Reinicia o pac-man
-	pac->direcao = PAC_DIRECAO_DIREITA;
-	pac->pre = PAC_DIRECAO_DIREITA;
+	pac->direcao = 3;
+	pac->pre = 3;
 	pac->boca = 0;
 	pac->mov = 0;
 	pac->velocidade = 0;
@@ -393,11 +396,11 @@ void reiniciar(Pacman *pac, Fantasma *ghost)
 }
 
 // Altera o estado dos fantasmas
-void mudarEstado(int tempo)
+void mudarEstadoFantasma(int tempo)
 {
 	if (pause)
 	{
-		glutTimerFunc(PAC_TIMER, mudarEstado, tempo);
+		glutTimerFunc(PAC_TIMER, mudarEstadoFantasma, tempo);
 	}
 	else if (tempo <= 0)
 	{
@@ -408,7 +411,7 @@ void mudarEstado(int tempo)
 			for (i = 0; i < PAC_FANTASMAS; i++)
 				ghost[i].estado = PAC_ESTADO_ESPALHAR;
 			estados++;
-			glutTimerFunc(PAC_TIMER, mudarEstado, 20000);
+			glutTimerFunc(PAC_TIMER, mudarEstadoFantasma, 20000);
 			// Perseguir
 		}
 		else
@@ -418,13 +421,13 @@ void mudarEstado(int tempo)
 			if (estados < 6)
 			{
 				estados++;
-				glutTimerFunc(PAC_TIMER, mudarEstado, 5000);
+				glutTimerFunc(PAC_TIMER, mudarEstadoFantasma, 5000);
 			}
 		}
 	}
 	else
 	{
-		glutTimerFunc(PAC_TIMER, mudarEstado, tempo - PAC_TIMER);
+		glutTimerFunc(PAC_TIMER, mudarEstadoFantasma, tempo - PAC_TIMER);
 	}
 }
 
@@ -473,11 +476,11 @@ void morreu(int tempo)
 }
 
 // Faz o jogador esperar antes de passar de fase
-void passou(int tempo)
+void passarFase(int tempo)
 {
 	if (pause)
 	{
-		glutTimerFunc(PAC_TIMER, passou, tempo);
+		glutTimerFunc(PAC_TIMER, passarFase, tempo);
 	}
 	else if (tempo <= 0)
 	{
@@ -490,7 +493,7 @@ void passou(int tempo)
 	}
 	else
 	{
-		glutTimerFunc(PAC_TIMER, passou, tempo - PAC_TIMER);
+		glutTimerFunc(PAC_TIMER, passarFase, tempo - PAC_TIMER);
 	}
 }
 
@@ -524,44 +527,6 @@ void terminarEspecial(int tempo)
 	}
 }
 
-// Identifica a direção de movimento pelas setas do teclado
-void mover(int tecla, int x, int y)
-{
-	if (menu)
-	{
-		// Move o cursor do menu
-		switch (tecla)
-		{
-		case GLUT_KEY_UP: // Move para cima
-			op = (op - 1) % 4;
-			if (op < 0) op += 4;
-			break;
-		case GLUT_KEY_DOWN: // Move para baixo
-			op = (op + 1) % 4;
-			break;
-		}
-	}
-	else if (!pause)
-	{
-		// Move o pac-man
-		switch (tecla)
-		{
-		case GLUT_KEY_UP: // Move para cima
-			pac->pre = PAC_DIRECAO_CIMA;
-			break;
-		case GLUT_KEY_LEFT: // Move para a esquerda
-			pac->pre = PAC_DIRECAO_ESQUERDA;
-			break;
-		case GLUT_KEY_DOWN: // Move para baixo
-			pac->pre = PAC_DIRECAO_BAIXO;
-			break;
-		case GLUT_KEY_RIGHT: // Move para a direita
-			pac->pre = PAC_DIRECAO_DIREITA;
-			break;
-		}
-	}
-}
-
 // Coloca ações em algumas teclas do teclado
 void teclado(unsigned char tecla, int x, int y)
 {
@@ -579,7 +544,7 @@ void teclado(unsigned char tecla, int x, int y)
 			{
 			case 0: // Iniciar Jogo
 				if (!pause)
-					reiniciarJogo();
+					reiniciaJogo();
 				pause = 0;
 				menu = 0;
 				break;
@@ -603,13 +568,50 @@ void teclado(unsigned char tecla, int x, int y)
 		break;
 		//  função do Esc
 	case 27:
-		pause = 1;
+		//pause = 1;
 		menu = 1;
 		break;
 	}
 }
 
-
+// movimentação das teclas do teclado
+void moveCursor(int tecla, int x, int y)
+{
+	//se estiver na tela menuas opcoes são para cima e para baixo
+	if (menu)
+	{
+		switch (tecla)
+		{
+		case GLUT_KEY_UP: // Move para cima
+			op = (op - 1) % 4;
+			if (op < 0) op += 4;
+			break;
+		case GLUT_KEY_DOWN: // Move para baixo
+			op = (op + 1) % 4;
+			break;
+		}
+	}
+	//se não vai está na tela do jogo e diferente de parado
+	else if (!pause)
+	{
+		// Movimentação do pac-man
+		switch (tecla)
+		{
+		case GLUT_KEY_UP: // Move para cima
+			pac->pre = 0;
+			break;
+		case GLUT_KEY_DOWN: // Move para baixo
+			pac->pre = 2;
+			break;
+		case GLUT_KEY_LEFT: // Move para a esquerda
+			pac->pre = 1;
+			break;
+		case GLUT_KEY_RIGHT: // Move para a direita
+			pac->pre = 3;
+			break;
+		}
+	}
+}
 //Dimensões da tela
 void redimensionar(int w, int h)
 {
@@ -631,12 +633,12 @@ void escreveTela(char *texto, int x, int y, int alinhamento, int selecionado)
 
 	// Define o alinhamento
 	if (alinhamento < 0)
-		posX = (double) -Largura/2 + x;
+		posX = (double) - Largura / 2 + x;
 	else if (alinhamento > 0)
-		posX = (double) Largura/2 - x - 9*strlen(texto);
+		posX = (double) Largura / 2 - x - 9 * strlen(texto);
 	else
-		posX = (double) -9*strlen(texto)/2 + x;
-	glRasterPos3f(posX, (double) Altura/2 - y - 9, 600);
+		posX = (double) - 9 * strlen(texto) / 2 + x;
+	glRasterPos3f(posX, (double) Altura / 2 - y - 9, 600);
 
 	//Define as posiçoes x,y,z na tela
 	glRasterPos3f(posX, (double) Altura / 2 - y - 9, 600);

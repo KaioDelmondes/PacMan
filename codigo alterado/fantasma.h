@@ -24,7 +24,7 @@ Fantasma *criaFantasmas() {
 		fant[i].nome = i;
 		fant[i].estado = PAC_ESTADO_ESPALHAR;
 		fant[i].capturado = PAC_CAPTURA_PRISAO;
-		fant[i].direcao = PAC_DIRECAO_CIMA;
+		fant[i].direcao = 0;
 		fant[i].mov = 0;
 		fant[i].velocidade = 0;
 		fant[i].tele = 0;
@@ -119,16 +119,16 @@ void mostrarFantasmas(Fantasma *fant, double interpolacao) {
 		double delta = min(1.0, fant[i].mov + fant[i].velocidade * interpolacao);
 		
 		switch (fant[i].direcao) {
-			case PAC_DIRECAO_CIMA:
+			case 0:
 				posY -= delta;
 				break;
-			case PAC_DIRECAO_ESQUERDA:
+			case 1:
 				posX -= delta;
 				break;
-			case PAC_DIRECAO_BAIXO:
+			case 2:
 				posY += delta;
 				break;
-			case PAC_DIRECAO_DIREITA:
+			case 3:
 				posX += delta;
 				break;
 		}
@@ -213,14 +213,14 @@ Tile *defineAlvo(Fantasma fant, Mapa *map, Pacman *pac, Fantasma *blinky) {
 				delta[Y] = referencia->pos[Y] - blinky->atual->pos[Y];
 				
 				if (delta[X] > 0)
-					referencia = proximoTileEm(2 * delta[X], map, blinky->atual, PAC_DIRECAO_DIREITA);
+					referencia = proximoTileEm(2 * delta[X], map, blinky->atual, 3);
 				else
-					referencia = proximoTileEm(-2 * delta[X], map, blinky->atual, PAC_DIRECAO_ESQUERDA);
+					referencia = proximoTileEm(-2 * delta[X], map, blinky->atual, 1);
 				
 				if (delta[Y] > 0)
-					referencia = proximoTileEm(2 * delta[Y], map, referencia, PAC_DIRECAO_BAIXO);
+					referencia = proximoTileEm(2 * delta[Y], map, referencia, 2);
 				else
-					referencia = proximoTileEm(-2 * delta[Y], map, referencia, PAC_DIRECAO_CIMA);
+					referencia = proximoTileEm(-2 * delta[Y], map, referencia, 0);
 				
 				return referencia;
 			case Fantasma4:

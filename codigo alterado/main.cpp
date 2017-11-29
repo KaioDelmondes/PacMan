@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <mmsystem.h>
+#include <windows.h>
+
 
 //Cabeçalhos importados
 #include "defines.h"
@@ -81,7 +84,7 @@ void inicializacao()
 	// Inicia o gerador de números
 	//srand(tempoInicial);
 	srand(tempoInicial);
-
+	PlaySound("Pacman2.wav", NULL, SND_ASYNC|SND_FILENAME|SND_LOOP);
 	glutTimerFunc(PAC_TIMER, mudarEstadoFantasma, 5000);
 }
 
@@ -251,6 +254,8 @@ void atualizarJogo()
 // Monta a cena do jogo de forma atualizada
 void mostrarJogo()
 {
+
+
 	// Exibe a pontuação atual e o recorde
 	itoa(pac->pontos, pontuacao, 10);
 	itoa(pac->vidas, vidas, 10);

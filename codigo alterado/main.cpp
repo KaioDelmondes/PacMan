@@ -64,8 +64,8 @@ int main()
 void inicializacao()
 {
 	// Cria os objetos do jogo
-	pac = criaPacman();
-	ghost = criaFantasmas();
+	pac = novo_pac();
+	ghost = novo_ghost();
 	//no mapa são carregadas duas matrizes uma com a posição dos elementos e a outa com a
 	//opcao das bolinhas
 	map = criaMapa(MPosicao, PBolinhas, pac, ghost);
@@ -198,7 +198,7 @@ void atualizarJogo()
 	{
 		// Atualiza o jogo, se não estiver pausado
 
-		while (tempoAtual - tempoInicial > frame && passos < PAC_PULOS_MAX)
+		while ((tempoAtual - tempoInicial) > frame && (passos < PAC_PULOS_MAX))
 		{
 			// Verifica se ainda restam bolinhas
 			if (map->bolinhas)
@@ -209,7 +209,7 @@ void atualizarJogo()
 					pac->boca = 30;
 					glutTimerFunc(PAC_TIMER, iniciou, 2000);
 				}
-				//se continua o jogo, verifica de o pac já morreu
+				//se continua o jogo, verifica se o pac já morreu
 				else if (pac->morto && !morto)
 				{
 					morto = 1;
@@ -219,13 +219,13 @@ void atualizarJogo()
 				//se o pac não está morto e nem terminou então move pacman
 				else if (!pac->morto && !fim)
 				{
-					movePacman(pac, map, ghost);
-					estaVivo(pac, ghost);
+					move_pac(pac, map, ghost);
+					is_live(pac, ghost);
 				}
 
 				// Move os fantasmas
 				if (!inicio && !fim)
-					moveFantasmas(ghost, map, pac);
+					move_ghost(ghost, map, pac);
 			}
 			else
 			{
@@ -286,20 +286,20 @@ void mostrarJogo()
 	{
 		posicionarCamera(pac, 0);
 		mostrarMapa(map);
-		mostrarPacman(pac, 0);
+		show_pac(pac, 0);
 
 		// Se passou de fase, não move os fantasmas
 		if (fim)
-			mostrarFantasmas(ghost, 0);
+			show_ghost(ghost, 0);
 		else
-			mostrarFantasmas(ghost, interpolacao);
+			show_ghost(ghost, interpolacao);
 	}
 	else
 	{
 		posicionarCamera(pac, interpolacao);
 		mostrarMapa(map);
-		mostrarPacman(pac, interpolacao);
-		mostrarFantasmas(ghost, interpolacao);
+		show_pac(pac, interpolacao);
+		show_ghost(ghost, interpolacao);
 	}
 //-------------------------- Monta miniatura-------------------------------
 	// Miniatura
@@ -319,11 +319,11 @@ void mostrarJogo()
 
 	mostrarMapa(map);
 	if (morto)
-		mostrarPacman(pac, 0); //sem mover pac
+		show_pac(pac, 0); //sem mover pac
 	else
-		mostrarPacman(pac, interpolacao); //mostra pac com movmentação
+		show_pac(pac, interpolacao); //mostra pac com movmentação
 
-	mostrarFantasmas(ghost, interpolacao); //fantasmas sempre se movem
+	show_ghost(ghost, interpolacao); //fantasmas sempre se movem
 }
 
 // Atualiza a posição da câmera, centralizando-a no pac-man
@@ -379,7 +379,7 @@ void reiniciar(Pacman *pac, Fantasma *ghost)
 	// Reinicia os fantasmas
 	for (i = 0; i < PAC_FANTASMAS; i++)
 	{
-		ghost[i].capturado = PAC_CAPTURA_PRISAO;
+		ghost[i].capturado = PAC_CAPTURA_NORMAL;
 		ghost[i].direcao = 0;
 		ghost[i].mov = 0;
 		ghost[i].velocidade = 0;

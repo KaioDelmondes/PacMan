@@ -85,32 +85,27 @@ Mapa *criaMapa(int tipos[][PAC_MAPA_LARGURA], int bolinhas[][PAC_MAPA_LARGURA], 
 			case Fantasma1_pac:
 				glColor3f(0, 0, 0);
 				desenhaQuadrado(1);
-				fant[Fantasma1].atual = &map->tiles[j][i];
-				fant[Fantasma1].inicio = &map->tiles[j][i];
+				fant[Fantasma1].atual = fant[Fantasma1].inicio = &map->tiles[j][i];
 				break;
 			case Fantasma2_pac:
 				glColor3f(0, 0, 0);
 				desenhaQuadrado(1);
-				fant[Fantasma2].atual = &map->tiles[j][i];
-				fant[Fantasma2].inicio = &map->tiles[j][i];
+				fant[Fantasma2].atual = fant[Fantasma2].inicio = &map->tiles[j][i];
 				break;
 			case Fantasma3_pac:
 				glColor3f(0, 0, 0);
 				desenhaQuadrado(1);
-				fant[Fantasma3].atual = &map->tiles[j][i];
-				fant[Fantasma3].inicio = &map->tiles[j][i];
+				fant[Fantasma3].atual = fant[Fantasma3].inicio = &map->tiles[j][i];
 				break;
 			case Fantasma4_pac:
 				glColor3f(0, 0, 0);
 				desenhaQuadrado(1);
-				fant[Fantasma4].atual = &map->tiles[j][i];
-				fant[Fantasma4].inicio = &map->tiles[j][i];
+				fant[Fantasma4].atual = fant[Fantasma4].inicio = &map->tiles[j][i];
 				break;
 			case PAC_PACMAN:
 				glColor3f(0, 0, 0);
 				desenhaQuadrado(1);
-				pac->atual = &map->tiles[j][i];
-				pac->inicio = &map->tiles[j][i];
+				pac->atual = pac->inicio = &map->tiles[j][i];
 				break;
 			}
 			glEnd();

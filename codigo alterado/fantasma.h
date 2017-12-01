@@ -1,18 +1,18 @@
-Fantasma *criaFantasmas();
-void moveFantasmas(Fantasma *, Mapa *, Pacman *);
-void mostrarFantasmas(Fantasma *, double);
-double velocidadeFantasma(Fantasma, Pacman *);
-Tile *defineAlvo(Fantasma, Mapa *, Pacman *, Fantasma *);
-int fantasmaPodeAndarSobre(Fantasma, Tile *);
+Fantasma *novo_ghost();
+void move_ghost(Fantasma *, Mapa *, Pacman *);
+void show_ghost(Fantasma *, double);
+double speed_ghost(Fantasma, Pacman *);
+Tile *novo_alvo(Fantasma, Mapa *, Pacman *, Fantasma *);
+int e_caminho(Fantasma, Tile *);
 int fantasmaPodeMudarDirecao(Fantasma, Mapa *);
-int melhorCaminho(Fantasma, Mapa *, Pacman *);
+int mehor_escolha(Fantasma, Mapa *, Pacman *);
 
 // Listas de Exibição
 unsigned int corpo;
 unsigned int olhos;
 
 // Instancia os fantasmas
-Fantasma *criaFantasmas() {
+Fantasma *novo_ghost() {
 	int i;
 	Fantasma *fant;
 	GLUquadricObj *cilindro;
@@ -68,18 +68,18 @@ Fantasma *criaFantasmas() {
 }
 
 // Realiza um passo de movimento com o fantasma
-void moveFantasmas(Fantasma *fant, Mapa *map, Pacman *pac) {
+void move_ghost(Fantasma *fant, Mapa *map, Pacman *pac) {
 	int i;
 	
-	for (i = 0; i < PAC_FANTASMAS; i++) {
+	for (i = 0; i < PAC_FANTASMAS; i++) {//Para cada Fantasma
 		// Atualiza o alvo
-		fant[i].alvo = defineAlvo(fant[i], map, pac, fant);
+		fant[i].alvo = novo_alvo(fant[i], map, pac, fant);
 		// Pega o próximo tile
 		fant[i].destino = proximoTile(map, fant[i].atual, fant[i].direcao, fant[i].tele);
 		// Verifica se pode mover-se para ele
-		if (fantasmaPodeAndarSobre(fant[i], fant[i].destino)) { // Se é permitido
+		if (e_caminho(fant[i], fant[i].destino)) { // Se é permitido ir para o novo destino
 			// Anda
-			fant[i].velocidade = velocidadeFantasma(fant[i], pac);
+			fant[i].velocidade = speed_ghost(fant[i], pac);
 			// Verifica se completou o movimento
 			if (fant[i].mov < 1) {
 				// Dá um passo
@@ -99,18 +99,18 @@ void moveFantasmas(Fantasma *fant, Mapa *map, Pacman *pac) {
 					fant[i].tele = !fant[i].tele;
 				fant[i].atual = fant[i].destino;
 				fant[i].mov = 0;
-				fant[i].direcao = melhorCaminho(fant[i], map, pac);
+				fant[i].direcao = mehor_escolha(fant[i], map, pac);
 			}
 		} else {
 			// Pára
 			fant[i].velocidade = 0;
-			fant[i].direcao = melhorCaminho(fant[i], map, pac);
+			fant[i].direcao = mehor_escolha(fant[i], map, pac);
 		}
 	}
 }
 
 // Exibe os fantasmas
-void mostrarFantasmas(Fantasma *fant, double interpolacao) {
+void show_ghost(Fantasma *fant, double interpolacao) {
 	int i;
 	
 	for (i = 0; i < PAC_FANTASMAS; i++) {
@@ -171,19 +171,19 @@ void mostrarFantasmas(Fantasma *fant, double interpolacao) {
 }
 
 // Retorna a velocidade do fantasma
-double velocidadeFantasma(Fantasma fant, Pacman *pac) {
-	if (pac->fase <= 5)
+double speed_ghost(Fantasma fant, Pacman *pac) {
+	if (pac->fase <= 1)
 		return PAC_VELOCIDADE_FANTASMA_A;
-	else if (pac->fase <= 10)
+	else if (pac->fase <= 2)
 		return PAC_VELOCIDADE_FANTASMA_B;
-	else if (pac->fase <= 20)
+	else if (pac->fase <= 3)
 		return PAC_VELOCIDADE_FANTASMA_C;
 	else
 		return PAC_VELOCIDADE_FANTASMA_D;
 }
 
 // Calcula o alvo do fantasma
-Tile *defineAlvo(Fantasma fant, Mapa *map, Pacman *pac, Fantasma *blinky) {
+Tile *novo_alvo(Fantasma fant, Mapa *map, Pacman *pac, Fantasma *blinky) {
 	// Sair da prisão
 	if (fant.capturado == PAC_CAPTURA_PRISAO) {
 		return &map->tiles[8][7];
@@ -235,7 +235,7 @@ Tile *defineAlvo(Fantasma fant, Mapa *map, Pacman *pac, Fantasma *blinky) {
 }
 
 // Verifica se é permitido passar sobre este tile
-int fantasmaPodeAndarSobre(Fantasma fant, Tile *tile) {
+int e_caminho(Fantasma fant, Tile *tile) {
 	return tile != 0
 		   && tile->tipo != PAC_PAREDE
 		   && (!ePrisao(tile)
@@ -250,12 +250,12 @@ int fantasmaPodeMudarDirecao(Fantasma fant, Mapa *map) {
 	destino = proximoTile(map, fant.atual, fant.direcao, fant.tele);
 	return fant.mov == 0
 		   && destino != 0
-		   && fantasmaPodeAndarSobre(fant, destino)
+		   && e_caminho(fant, destino)
 		   && !destino->tele;
 }
 
 // Indica a direção que o fantasma deve seguir
-int melhorCaminho(Fantasma fant, Mapa *map, Pacman *pac) {
+int mehor_escolha(Fantasma fant, Mapa *map, Pacman *pac) {
 	int i;
 	int podeMudar[4];
 	double distancia[4];

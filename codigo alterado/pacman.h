@@ -1,11 +1,11 @@
-Pacman *criaPacman();
-void movePacman(Pacman *, Mapa *, Fantasma *);
-void mostrarPacman(Pacman *, double);
-double velocidadePacman(Pacman *);
-int pacmanPodeAndarSobre(Tile *);
-int pacmanPodeMudarDirecao(Pacman *, Mapa *);
-void estaVivo(Pacman *, Fantasma *);
-void ganharPontos(Pacman *, int, int *);
+Pacman *novo_pac();
+void move_pac(Pacman *, Mapa *, Fantasma *);
+void show_pac(Pacman *, double);
+double speed_pac(Pacman *);
+int e_caminho(Tile *);
+int nova_direcao(Pacman *, Mapa *);
+void is_live(Pacman *, Fantasma *);
+void ganha_pontos(Pacman *, int, int *);
 void hemisferio(double);
 
 // Listas de exibição
@@ -13,7 +13,7 @@ unsigned int cima;
 unsigned int baixo;
 
 // Instancia o pac-man
-Pacman *criaPacman() {
+Pacman *novo_pac() {
 	Pacman *pac;
 	GLUquadricObj *disco;
 	
@@ -58,19 +58,19 @@ Pacman *criaPacman() {
 }
 
 // Realiza um passo de movimento com o pac-man
-void movePacman(Pacman *pac, Mapa *map, Fantasma *fant) {
+void move_pac(Pacman *pac, Mapa *map, Fantasma *fant) {
 	int i;
 	
 	// Tenta mudar para a direção desejada
-	if (pacmanPodeMudarDirecao(pac, map))
+	if (nova_direcao(pac, map))
 		pac->direcao = pac->pre;
 	
 	// Pega o próximo tile
 	pac->destino = proximoTile(map, pac->atual, pac->direcao, pac->tele);
 	// Verifica se pode mover-se para ele
-	if (pacmanPodeAndarSobre(pac->destino)) {
+	if (e_caminho(pac->destino)) {
 		// Anda
-		pac->velocidade = velocidadePacman(pac);
+		pac->velocidade = speed_pac(pac);
 		// Verifica se completou o movimento
 		if (pac->mov < 1) {
 			// Dá um passo
@@ -82,10 +82,10 @@ void movePacman(Pacman *pac, Mapa *map, Fantasma *fant) {
 				map->bolinhas--;
 			switch (pac->destino->bolinha) {
 				case PAC_BOLINHA_NORMAL:
-					ganharPontos(pac, 10, &maiorPontuacao);
+					ganha_pontos(pac, 10, &maiorPontuacao);
 					break;
 				case PAC_BOLINHA_ESPECIAL:
-					ganharPontos(pac, 50, &maiorPontuacao);
+					ganha_pontos(pac, 50, &maiorPontuacao);
 					pac->capturados = 0;
 					for (i = 0; i < PAC_FANTASMAS; i++)
 						if (fant[i].capturado == PAC_CAPTURA_NORMAL)
@@ -114,7 +114,7 @@ void movePacman(Pacman *pac, Mapa *map, Fantasma *fant) {
 }
 
 // Exibe o Pacman
-void mostrarPacman(Pacman *pac, double interpolacao) {
+void show_pac(Pacman *pac, double interpolacao) {
 	double posX = pac->atual->pos[X];
 	double posY = pac->atual->pos[Y];
 	double delta = min(1.0, pac->mov + pac->velocidade * interpolacao);
@@ -153,19 +153,19 @@ void mostrarPacman(Pacman *pac, double interpolacao) {
 }
 
 // Retorna a velocidade do pac-man
-double velocidadePacman(Pacman *pac) {
-	if (pac->fase <= 5)
+double speed_pac(Pacman *pac) {
+	if (pac->fase <= 1)
 		return PAC_VELOCIDADE_PACMAN_A;
-	else if (pac->fase <= 10)
+	else if (pac->fase <= 2)
 		return PAC_VELOCIDADE_PACMAN_B;
-	else if (pac->fase <= 20)
+	else if (pac->fase <= 3)
 		return PAC_VELOCIDADE_PACMAN_C;
 	else
 		return PAC_VELOCIDADE_PACMAN_D;
 }
 
 // Verifica se é permitido passar sobre este tile
-int pacmanPodeAndarSobre(Tile *tile) {
+int e_caminho(Tile *tile) {
 	return tile != 0
 		   && tile->tipo != PAC_PAREDE
 		   && tile->tipo != Fantasma1_pac
@@ -176,21 +176,20 @@ int pacmanPodeAndarSobre(Tile *tile) {
 }
 
 // Verifica se é permitido mudar de direção
-int pacmanPodeMudarDirecao(Pacman *pac, Mapa *map) {
+int nova_direcao(Pacman *pac, Mapa *map) {
 	Tile *destino;
 	
 	destino = proximoTile(map, pac->atual, pac->pre, pac->tele);
 	return pac->pre != pac->direcao
 		   && pac->mov == 0
 		   && destino != 0
-		   && pacmanPodeAndarSobre(destino)
+		   && e_caminho(destino)
 		   && !destino->tele;
 }
 
 // Verifica se o pac-man está no mesmo quadrado que um fantasma
-void estaVivo(Pacman *pac, Fantasma *fant) {
+void is_live(Pacman *pac, Fantasma *fant) {
 	int i;
-	
 	for (i = 0; i < PAC_FANTASMAS; i++) {
 		if (pac->atual == fant[i].atual) {
 			switch (fant[i].capturado) {
@@ -201,7 +200,7 @@ void estaVivo(Pacman *pac, Fantasma *fant) {
 				case PAC_CAPTURA_AZUL:
 					// Se o pac-man capturou um fantasma
 					fant[i].capturado = PAC_CAPTURA_CAPTURADO;
-					ganharPontos(pac, 200 << pac->capturados, &maiorPontuacao);
+					ganha_pontos(pac, 200 << pac->capturados, &maiorPontuacao);
 					pac->capturados++;
 					break;
 			}
@@ -210,7 +209,7 @@ void estaVivo(Pacman *pac, Fantasma *fant) {
 }
 
 // Aumenta a pontuação
-void ganharPontos(Pacman *pac, int pontos, int *recorde) {
+void ganha_pontos(Pacman *pac, int pontos, int *recorde) {
 	pac->pontos += pontos;
 	if (pac->pontos % 10000 < pontos)
 		pac->vidas++;

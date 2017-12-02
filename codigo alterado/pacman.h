@@ -72,7 +72,11 @@ void move_pac(Pacman *pac, Mapa *map, Fantasma *fant) {
 		// Anda
 		pac->velocidade = speed_pac(pac);
 		// Verifica se completou o movimento
-		if (pac->mov < 1) {
+		if (pac->mov < 1) {//Esse if tem a função também de abrir a boca do pacman na porção certa no momento exato
+			/*Quando esse "mov" atingir 1 é por que um quadrado todo foi percorrido pelo PacMan
+			e, se esse quadrado estiver preenchido com uma bolinha(comida), o else abaixo fica responsável por
+			atualizar a pontuação
+			*/
 			// Dá um passo
 			pac->mov += pac->velocidade;
 			pac->boca = PAC_BOCA_MAX * pac->mov;
@@ -80,7 +84,7 @@ void move_pac(Pacman *pac, Mapa *map, Fantasma *fant) {
 			// Atualiza a pontuação
 			if (pac->destino->bolinha == PAC_BOLINHA_NORMAL || pac->destino->bolinha == PAC_BOLINHA_ESPECIAL)
 				map->bolinhas--;
-			switch (pac->destino->bolinha) {
+			switch (pac->destino->bolinha){
 				case PAC_BOLINHA_NORMAL:
 					ganha_pontos(pac, 10, &maiorPontuacao);
 					break;
@@ -90,7 +94,8 @@ void move_pac(Pacman *pac, Mapa *map, Fantasma *fant) {
 					for (i = 0; i < PAC_FANTASMAS; i++)
 						if (fant[i].capturado == PAC_CAPTURA_NORMAL)
 							fant[i].capturado = PAC_CAPTURA_AZUL;
-					if (pac->fase < 11) {
+					if (pac->fase < 11) {/*A cada fase a quantidade de bolinhas especiais do PacMan vai aumentando.
+											A partir da 11ª fase essa quantidade fica constante*/
 						especiais++;
 						glutTimerFunc(PAC_TIMER, terminarEspecial, (11-pac->fase)*1000);
 					}
@@ -101,12 +106,10 @@ void move_pac(Pacman *pac, Mapa *map, Fantasma *fant) {
 			
 			// Atualiza a posição
 			if (pac->destino->tele) pac->tele = !pac->tele;
-			pac->atual = pac->destino;
-			pac->boca = 0;
+			pac->atual = pac->destino;//a posição atual do PacMan é o seu destino
+			pac->boca = 0;//Abertura da boca
 			pac->mov = 0;
 		}
-		
-	
 	} else {
 		// Pára
 		pac->velocidade = 0;
@@ -154,6 +157,11 @@ void show_pac(Pacman *pac, double interpolacao) {
 
 // Retorna a velocidade do pac-man
 double speed_pac(Pacman *pac) {
+	//a cada fase o fantasma tem novas velocidades
+	/*Na primeira fase ele é bem mais lento que o pacman. Na segunda essa diferença cai. Na terceira
+	as velocidades de todos se igualam, e a partir da 4 fase o fantasma fica mais rápido que o
+	Pacman, aumentando a velocidade. As definições das velocidades podem ser vistas no cabeçalho defines.h
+	*/
 	if (pac->fase <= 1)
 		return PAC_VELOCIDADE_PACMAN_A;
 	else if (pac->fase <= 2)
@@ -167,12 +175,12 @@ double speed_pac(Pacman *pac) {
 // Verifica se é permitido passar sobre este tile
 int e_caminho(Tile *tile) {
 	return tile != 0
-		   && tile->tipo != PAC_PAREDE
-		   && tile->tipo != Fantasma1_pac
-		   && tile->tipo != Fantasma2_pac
-		   && tile->tipo != Fantasma3_pac
-		   && tile->tipo != Fantasma4_pac
-		   && tile->tipo != PAC_NADA;
+		   && tile->tipo != PAC_PAREDE//Se não for parede
+		   && tile->tipo != Fantasma1_pac//Se não for fantasma
+		   && tile->tipo != Fantasma2_pac//Se não for fantasma
+		   && tile->tipo != Fantasma3_pac//Se não for fantasma
+		   && tile->tipo != Fantasma4_pac//Se não for fantasma
+		   && tile->tipo != PAC_NADA;//Se a parte for pertencente ao mapa
 }
 
 // Verifica se é permitido mudar de direção
@@ -181,9 +189,9 @@ int nova_direcao(Pacman *pac, Mapa *map) {
 	
 	destino = proximoTile(map, pac->atual, pac->pre, pac->tele);
 	return pac->pre != pac->direcao
-		   && pac->mov == 0
-		   && destino != 0
-		   && e_caminho(destino)
+		   && pac->mov == 0 //Se Já se passou um quadrado
+		   && destino != 0 
+		   && e_caminho(destino)//Se é caminho permitido
 		   && !destino->tele;
 }
 

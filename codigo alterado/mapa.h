@@ -82,6 +82,7 @@ Mapa *criaMapa(int tipos[][PAC_MAPA_LARGURA], int bolinhas[][PAC_MAPA_LARGURA], 
 				glColor3f(0.3, 0, 0.1);
 				desenhaQuadrado(1);
 				break;
+			//A partir daque é dada uma posição inicial para cada fantasma
 			case Fantasma1_pac:
 				glColor3f(0, 0, 0);
 				desenhaQuadrado(1);
@@ -102,19 +103,22 @@ Mapa *criaMapa(int tipos[][PAC_MAPA_LARGURA], int bolinhas[][PAC_MAPA_LARGURA], 
 				desenhaQuadrado(1);
 				fant[Fantasma4].atual = fant[Fantasma4].inicio = &map->tiles[j][i];
 				break;
+			//aqui a posição do pacman.
 			case PAC_PACMAN:
 				glColor3f(0, 0, 0);
 				desenhaQuadrado(1);
 				pac->atual = pac->inicio = &map->tiles[j][i];
 				break;
 			}
+			//Essas posições foram definidas previamente no cabeçalho matrizes.h
 			glEnd();
 			glTranslated(1, 0, 0);
 		}
 		glPopMatrix();
 	}
 	glEndList();
-
+	/*Até aqui foi criada a lista dos objetos a serem renderizados*/
+	
 	map->bolinhas = 0;
 	for (j = 0; j < PAC_MAPA_ALTURA; j++)
 	{
@@ -124,8 +128,6 @@ Mapa *criaMapa(int tipos[][PAC_MAPA_LARGURA], int bolinhas[][PAC_MAPA_LARGURA], 
 				map->bolinhas++;
 		}
 	}
-	
-	
 
 	return map;
 }
@@ -176,7 +178,8 @@ void mostrarMapa(Mapa *map)
 
 }
 
-// Reinicia o mapa
+// Reinicia o mapa -- a cada vez que o jogo é iniciado o contador de bolinhas restantes é resetado.
+// Essa situação ocorre no início do jogo e quando o pacman captura todas as bolinhas
 void reiniciarMapa(Mapa *map, int bolinhas[][PAC_MAPA_LARGURA])
 {
 	int i, j;
@@ -209,7 +212,7 @@ Tile *proximoTile(Mapa *map, Tile *tile, int direcao, int tele)
 		// Procura o próximo
 		switch (direcao)
 		{
-			//para cima
+		//para cima
 		case 0:
 			if (tile->pos[Y] == 0) return 0;
 			return &map->tiles[tile->pos[Y] - 1][tile->pos[X]];

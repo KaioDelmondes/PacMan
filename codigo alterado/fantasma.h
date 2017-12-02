@@ -72,11 +72,11 @@ void move_ghost(Fantasma *fant, Mapa *map, Pacman *pac) {
 	int i;
 	
 	for (i = 0; i < PAC_FANTASMAS; i++) {//Para cada Fantasma
-		// Atualiza o alvo
+		// Atualiza o alvo -- Pode ir pra prisão, caçar o pacman ou fugir dele
 		fant[i].alvo = novo_alvo(fant[i], map, pac, fant);
-		// Pega o próximo tile
+		// Pega o próximo tile -- se é o quadrado acima, abaixo, a direita ou a esquerda
 		fant[i].destino = proximoTile(map, fant[i].atual, fant[i].direcao, fant[i].tele);
-		// Verifica se pode mover-se para ele
+		// Verifica se pode mover-se para ele -- Pode ser uma parede
 		if (e_caminho(fant[i], fant[i].destino)) { // Se é permitido ir para o novo destino
 			// Anda
 			fant[i].velocidade = speed_ghost(fant[i], pac);
@@ -84,7 +84,7 @@ void move_ghost(Fantasma *fant, Mapa *map, Pacman *pac) {
 			if (fant[i].mov < 1) {
 				// Dá um passo
 				fant[i].mov += fant[i].velocidade;
-			} else {
+			} else {//se não completou o movimento
 				// Permite ser capturado quando sai da prisão
 				if (fant[i].capturado == PAC_CAPTURA_PRISAO
 					&& !ePrisao(fant[i].destino))
@@ -94,17 +94,20 @@ void move_ghost(Fantasma *fant, Mapa *map, Pacman *pac) {
 						 && fant[i].destino == fant[i].inicio)
 					fant[i].capturado = PAC_CAPTURA_PRISAO;
 				
-				// Atualiza a posição
+				// Atualiza a posição -- A cada passo que o fantasma dá, é parado o seu movimento e calcu
+				//lada a melhor direção para ele mover-se para que na próxima iteração ele possa mudar de
+				//direção
 				if (fant[i].destino->tele)
 					fant[i].tele = !fant[i].tele;
-				fant[i].atual = fant[i].destino;
-				fant[i].mov = 0;
-				fant[i].direcao = mehor_escolha(fant[i], map, pac);
+				fant[i].atual = fant[i].destino; //atualiza a posição do fantasma
+				fant[i].mov = 0; //Para o movimento para que na proxima iteração seja recalculado
+				fant[i].direcao = mehor_escolha(fant[i], map, pac);//calcula a melhor direção do prox. passo
 			}
 		} else {
-			// Pára
+			// Pára -- se não puder passar sobre, o fantasma pára
 			fant[i].velocidade = 0;
-			fant[i].direcao = mehor_escolha(fant[i], map, pac);
+			fant[i].direcao = mehor_escolha(fant[i], map, pac);//calcula a melhor direção para o movimento
+																//da proxima iteração
 		}
 	}
 }
@@ -113,7 +116,7 @@ void move_ghost(Fantasma *fant, Mapa *map, Pacman *pac) {
 void show_ghost(Fantasma *fant, double interpolacao) {
 	int i;
 	
-	for (i = 0; i < PAC_FANTASMAS; i++) {
+	for (i = 0; i < PAC_FANTASMAS; i++) {//Posição de cada fantasma no mapa
 		double posX = fant[i].atual->pos[X];
 		double posY = fant[i].atual->pos[Y];
 		double delta = min(1.0, fant[i].mov + fant[i].velocidade * interpolacao);
@@ -171,7 +174,11 @@ void show_ghost(Fantasma *fant, double interpolacao) {
 }
 
 // Retorna a velocidade do fantasma
-double speed_ghost(Fantasma fant, Pacman *pac) {
+double speed_ghost(Fantasma fant, Pacman *pac) {//a cada fase o fantasma tem novas velocidades
+	/*Na primeira fase ele é bem mais lento que o pacman. Na segunda essa diferença cai. Na terceira
+	as velocidades de todos se igualam, e a partir da 4 fase o fantasma fica mais rápido que o
+	Pacman, aumentando a velocidade. As definições das velocidades podem ser vistas no cabeçalho defines.h
+	*/
 	if (pac->fase <= 1)
 		return PAC_VELOCIDADE_FANTASMA_A;
 	else if (pac->fase <= 2)
@@ -184,7 +191,7 @@ double speed_ghost(Fantasma fant, Pacman *pac) {
 
 // Calcula o alvo do fantasma
 Tile *novo_alvo(Fantasma fant, Mapa *map, Pacman *pac, Fantasma *blinky) {
-	// Sair da prisão
+	// Sair da prisão 
 	if (fant.capturado == PAC_CAPTURA_PRISAO) {
 		return &map->tiles[8][7];
 	// Fugir
@@ -203,8 +210,10 @@ Tile *novo_alvo(Fantasma fant, Mapa *map, Pacman *pac, Fantasma *blinky) {
 		Tile *referencia;
 		int delta[2];
 		switch (fant.nome) {
+			//O fantasma 1 é mais objetivo e tem como alvo sempre a posição do pacman
 			case Fantasma1:
 				return pac->atual;
+			//O fantasma 2 pega o tile que vai deixá-lo 4 tiles mais próximo ao PacMan
 			case Fantasma2:
 				return proximoTileEm(4, map, pac->atual, pac->direcao);
 			case Fantasma3:
@@ -223,6 +232,8 @@ Tile *novo_alvo(Fantasma fant, Mapa *map, Pacman *pac, Fantasma *blinky) {
 					referencia = proximoTileEm(-2 * delta[Y], map, referencia, 0);
 				
 				return referencia;
+			//Se a distância entre o Fantasma 4 e o PacMan for maior que 8, o alvo se torna o pacman,
+			//caso contrário é dada a posição do canto inferior esquedo do mapa
 			case Fantasma4:
 				if (distanciaEntre(fant.atual, pac->atual) > 8)
 					return pac->atual;
@@ -239,19 +250,19 @@ int e_caminho(Fantasma fant, Tile *tile) {
 	return tile != 0
 		   && tile->tipo != PAC_PAREDE
 		   && (!ePrisao(tile)
-			   || fant.capturado == PAC_CAPTURA_PRISAO
-			   || fant.capturado == PAC_CAPTURA_CAPTURADO)
-		   && tile->tipo != PAC_NADA;
+			   || fant.capturado == PAC_CAPTURA_PRISAO//Se ta preso, pode passar por cima
+			   || fant.capturado == PAC_CAPTURA_CAPTURADO)//Se ele foi capturado, pode passar por cima
+		   && tile->tipo != PAC_NADA; //Não for parte preta fora do mapa
 }
 
 int fantasmaPodeMudarDirecao(Fantasma fant, Mapa *map) {
 	Tile *destino;
 	
 	destino = proximoTile(map, fant.atual, fant.direcao, fant.tele);
-	return fant.mov == 0
-		   && destino != 0
-		   && e_caminho(fant, destino)
-		   && !destino->tele;
+	return fant.mov == 0//Se o fantasma nao esbarrou em alguma parede
+		   && destino != 0 //Se pertencer às delimitações da matriz
+		   && e_caminho(fant, destino)//se for um caminho possivel
+		   && !destino->tele;//Se nao for teletransporte
 }
 
 // Indica a direção que o fantasma deve seguir
@@ -264,7 +275,8 @@ int mehor_escolha(Fantasma fant, Mapa *map, Pacman *pac) {
 	int direcaoOposta = (fant.direcao + 2) % 4;
 	Tile *destino;
 	
-	// Verifica as direções possíveis e a distância de cada uma do alvo
+	/*Verifica as direções possiveis para a movimentação do fantasma. Depois disso
+	calcula a distância entre o destino calculado e o alvo do fantasma*/
 	for (i = 0; i < 4; i++) {
 		fant.direcao = i;
 		destino = proximoTile(map, fant.atual, fant.direcao, fant.tele);
@@ -275,7 +287,7 @@ int mehor_escolha(Fantasma fant, Mapa *map, Pacman *pac) {
 		distancia[i] = distanciaEntre(destino, fant.alvo);
 	}
 	
-	// Encontra a que tem menor distância do alvo
+	/*Com as distâncias calculadas acima salvas no vetor distancia[], pega a direão de menor distância ao alvo*/
 	for (i = 0; i < 4; i++) {
 		if (podeMudar[i] && distancia[i] < menorDistancia) {
 			melhorDirecao = i;

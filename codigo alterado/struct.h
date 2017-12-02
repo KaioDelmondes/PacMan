@@ -10,7 +10,6 @@ typedef struct mapa
 {
 	struct quadradinho **tiles; // Matriz de tiles
 	int bolinhas; // Bolinhas restantes
-	//int paredes;
 	unsigned int lista; // Lista de exibição
 } Mapa;
 

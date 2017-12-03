@@ -9,30 +9,14 @@
 #define PAC_PULOS_MAX 4
 
 // Tempo (em ms) para verificar se um estado do jogo mudou
-#define PAC_TIMER 500
+#define PAC_TIMER 900
+//#define PAC_TIMER 500
 
 // Tamanho do Mapa
 #define PAC_TAMANHO_MAPA 50
 #define PAC_TAMANHO_MINIATURA 8
 #define PAC_MAPA_ALTURA 21
 #define PAC_MAPA_LARGURA 19
-
-// Tipos de fantasmas
-#define Fantasma1 0
-#define Fantasma2 1
-#define Fantasma3 2
-#define Fantasma4 3
-
-// posições dos elementos do pacman
-#define PAC_CAMINHO 0
-#define PAC_PAREDE 1
-#define PAC_TELETRANSPORTE 2
-#define Fantasma1_pac 3
-#define Fantasma2_pac 4
-#define Fantasma3_pac 5
-#define Fantasma4_pac 6
-#define PAC_PACMAN 7
-#define PAC_NADA 9
 
 // Tipos de bolinhas
 #define PAC_BOLINHA_NENHUMA 0
@@ -42,7 +26,11 @@
 // Quantidade de Fantasmas
 #define PAC_FANTASMAS 4
 
-
+// Tipos de fantasmas
+#define Fantasma1 0
+#define Fantasma2 1
+#define Fantasma3 2
+#define Fantasma4 3
 
 // Estados dos fantasmas
 #define PAC_ESTADO_ESPALHAR 0
@@ -53,6 +41,16 @@
 #define PAC_CAPTURA_NORMAL -1
 #define PAC_CAPTURA_AZUL 0
 #define PAC_CAPTURA_CAPTURADO 1
+
+// posições dos elementos do pacman
+#define PAC_CAMINHO 0
+#define PAC_PAREDE 1
+#define Fantasma1_pac 3
+#define Fantasma2_pac 4
+#define Fantasma3_pac 5
+#define Fantasma4_pac 6
+#define PAC_PACMAN 7
+#define PAC_NADA 9
 
 // Velocidade dos personagens
 #define PAC_VELOCIDADE_PACMAN_A 0.167 // 1/6 quadradinhos por frame

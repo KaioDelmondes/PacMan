@@ -3,7 +3,6 @@ typedef struct quadradinho
 	int tipo; // Tipo
 	int bolinha; // Bolinha que está dentro
 	int pos[2]; // Posição
-	struct quadradinho *tele; // Para onde teletransporta
 } Tile;
 
 typedef struct mapa
@@ -25,7 +24,7 @@ typedef struct pacman
 	int boca; // Abertura da boca
 	double mov; // Porcentagem de movimento
 	double velocidade; // Velocidade
-	int tele; // Se foi teletransportado
+
 	struct quadradinho *atual; // Posição atual
 	struct quadradinho *destino; // Próxima posição
 	struct quadradinho *inicio; // Posição inicial
@@ -39,7 +38,6 @@ typedef struct fantasma
 	int direcao; // Direção de movimento
 	double mov; // Porcentagem de movimento
 	double velocidade; // Velocidade
-	int tele; // Se foi teletransportado
 	struct quadradinho *atual; // Posição atual
 	struct quadradinho *destino; // Próxima posição
 	struct quadradinho *inicio; // Posição inicial

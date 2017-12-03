@@ -32,7 +32,7 @@ Pacman *novo_pac() {
 	pac->boca = 0;
 	pac->mov = 0;
 	pac->velocidade = 0;
-	pac->tele = 0;
+
 	pac->atual = 0;
 	pac->destino = 0;
 	pac->inicio = 0;
@@ -66,7 +66,7 @@ void move_pac(Pacman *pac, Mapa *map, Fantasma *fant) {
 		pac->direcao = pac->pre;
 	
 	// Pega o próximo tile
-	pac->destino = proximoTile(map, pac->atual, pac->direcao, pac->tele);
+	pac->destino = proximoTile(map, pac->atual, pac->direcao);
 	// Verifica se pode mover-se para ele
 	if (e_caminho(pac->destino)) {
 		// Anda
@@ -105,7 +105,6 @@ void move_pac(Pacman *pac, Mapa *map, Fantasma *fant) {
 			pac->destino->bolinha = 3;
 			
 			// Atualiza a posição
-			if (pac->destino->tele) pac->tele = !pac->tele;
 			pac->atual = pac->destino;//a posição atual do PacMan é o seu destino
 			pac->boca = 0;//Abertura da boca
 			pac->mov = 0;
@@ -187,12 +186,12 @@ int e_caminho(Tile *tile) {
 int nova_direcao(Pacman *pac, Mapa *map) {
 	Tile *destino;
 	
-	destino = proximoTile(map, pac->atual, pac->pre, pac->tele);
+	destino = proximoTile(map, pac->atual, pac->pre);
 	return pac->pre != pac->direcao
 		   && pac->mov == 0 //Se Já se passou um quadrado
 		   && destino != 0 
-		   && e_caminho(destino)//Se é caminho permitido
-		   && !destino->tele;
+		   && e_caminho(destino);//Se é caminho permitido
+		  
 }
 
 // Verifica se o pac-man está no mesmo quadrado que um fantasma

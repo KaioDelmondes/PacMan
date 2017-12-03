@@ -27,7 +27,6 @@ Fantasma *novo_ghost() {
 		fant[i].direcao = 0;
 		fant[i].mov = 0;
 		fant[i].velocidade = 0;
-		fant[i].tele = 0;
 		fant[i].atual = 0;
 		fant[i].destino = 0;
 		fant[i].inicio = 0;
@@ -46,22 +45,16 @@ Fantasma *novo_ghost() {
 	
 	olhos = glGenLists(1);
 	glNewList(olhos, GL_COMPILE);
-	glColor3f(1, 1, 1);
+	glColor3f(0.1, 1, 0.1);
 	glTranslated(0.275, 0.5, 0.65);
 	glScaled(1, 0.5, 1.75);
 	glutSolidSphere(0.15, 30, 30);
-	glColor3f(0, 0, 1);
-	glTranslated(0, 0.1, 0);
-	glutSolidSphere(0.08, 30, 30);
 	glPopMatrix();
 	glPushMatrix();
-	glColor3f(1, 1, 1);
+	glColor3f(0.1, 1,0.1);
 	glTranslated(-0.275, 0.5, 0.65);
 	glScaled(1, 0.5, 1.75);
 	glutSolidSphere(0.15, 30, 30);
-	glColor3f(0, 0, 1);
-	glTranslated(0, 0.1, 0);
-	glutSolidSphere(0.08, 30, 30);
 	glEndList();
 	
 	return fant;
@@ -75,7 +68,7 @@ void move_ghost(Fantasma *fant, Mapa *map, Pacman *pac) {
 		// Atualiza o alvo -- Pode ir pra prisão, caçar o pacman ou fugir dele
 		fant[i].alvo = novo_alvo(fant[i], map, pac, fant);
 		// Pega o próximo tile -- se é o quadrado acima, abaixo, a direita ou a esquerda
-		fant[i].destino = proximoTile(map, fant[i].atual, fant[i].direcao, fant[i].tele);
+		fant[i].destino = proximoTile(map, fant[i].atual, fant[i].direcao);
 		// Verifica se pode mover-se para ele -- Pode ser uma parede
 		if (e_caminho(fant[i], fant[i].destino)) { // Se é permitido ir para o novo destino
 			// Anda
@@ -97,8 +90,7 @@ void move_ghost(Fantasma *fant, Mapa *map, Pacman *pac) {
 				// Atualiza a posição -- A cada passo que o fantasma dá, é parado o seu movimento e calcu
 				//lada a melhor direção para ele mover-se para que na próxima iteração ele possa mudar de
 				//direção
-				if (fant[i].destino->tele)
-					fant[i].tele = !fant[i].tele;
+			
 				fant[i].atual = fant[i].destino; //atualiza a posição do fantasma
 				fant[i].mov = 0; //Para o movimento para que na proxima iteração seja recalculado
 				fant[i].direcao = mehor_escolha(fant[i], map, pac);//calcula a melhor direção do prox. passo
@@ -258,11 +250,11 @@ int e_caminho(Fantasma fant, Tile *tile) {
 int fantasmaPodeMudarDirecao(Fantasma fant, Mapa *map) {
 	Tile *destino;
 	
-	destino = proximoTile(map, fant.atual, fant.direcao, fant.tele);
+	destino = proximoTile(map, fant.atual, fant.direcao);
 	return fant.mov == 0//Se o fantasma nao esbarrou em alguma parede
 		   && destino != 0 //Se pertencer às delimitações da matriz
-		   && e_caminho(fant, destino)//se for um caminho possivel
-		   && !destino->tele;//Se nao for teletransporte
+		   && e_caminho(fant, destino);//se for um caminho possivel
+		  
 }
 
 // Indica a direção que o fantasma deve seguir
@@ -279,7 +271,7 @@ int mehor_escolha(Fantasma fant, Mapa *map, Pacman *pac) {
 	calcula a distância entre o destino calculado e o alvo do fantasma*/
 	for (i = 0; i < 4; i++) {
 		fant.direcao = i;
-		destino = proximoTile(map, fant.atual, fant.direcao, fant.tele);
+		destino = proximoTile(map, fant.atual, fant.direcao);
 		if (i != direcaoOposta && destino)
 			podeMudar[i] = fantasmaPodeMudarDirecao(fant, map);
 		else

@@ -1,7 +1,7 @@
 Mapa *criaMapa(int [][PAC_MAPA_LARGURA], int [][PAC_MAPA_LARGURA], Pacman *, Fantasma *);
 void mostrarMapa(Mapa *);
 void reiniciarMapa(Mapa *, int [][PAC_MAPA_LARGURA]);
-Tile *proximoTile(Mapa *, Tile *, int, int);
+Tile *proximoTile(Mapa *, Tile *, int);
 Tile *proximoTileEm(int, Mapa *, Tile *, int);
 int ePrisao(Tile *);
 double distanciaEntre(Tile *, Tile *);
@@ -11,7 +11,7 @@ void desenhaQuadrado(float);
 Mapa *criaMapa(int tipos[][PAC_MAPA_LARGURA], int bolinhas[][PAC_MAPA_LARGURA], Pacman *pac, Fantasma *fant)
 {
 	Mapa *map;
-	Tile *teletransporte = NULL;
+
 	int i, j, k;
 	// l = 0;
 
@@ -36,24 +36,7 @@ Mapa *criaMapa(int tipos[][PAC_MAPA_LARGURA], int bolinhas[][PAC_MAPA_LARGURA], 
 			map->tiles[j][i].pos[X] = i;
 			map->tiles[j][i].pos[Y] = j;
 
-			// Liga os teletransportes
-			if (tipos[j][i] == PAC_TELETRANSPORTE)
-			{
-				if (teletransporte)
-				{
-					map->tiles[j][i].tele = teletransporte;
-					teletransporte->tele = &map->tiles[j][i];
-					teletransporte = NULL;
-				}
-				else
-				{
-					teletransporte = &map->tiles[j][i];
-				}
-			}
-			else
-			{
-				map->tiles[j][i].tele = 0;
-			}
+			
 		}
 	}
 
@@ -78,9 +61,8 @@ Mapa *criaMapa(int tipos[][PAC_MAPA_LARGURA], int bolinhas[][PAC_MAPA_LARGURA], 
 				glColor3f(0, 0.1, 0.2);
 				desenhaQuadrado(1);
 				break;
-			case PAC_TELETRANSPORTE:
-				glColor3f(0.3, 0, 0.1);
-				desenhaQuadrado(1);
+			
+			
 				break;
 			//A partir daque é dada uma posição inicial para cada fantasma
 			case Fantasma1_pac:
@@ -198,7 +180,7 @@ void reiniciarMapa(Mapa *map, int bolinhas[][PAC_MAPA_LARGURA])
 }
 
 // Retorna um ponteiro para o próximo tile
-Tile *proximoTile(Mapa *map, Tile *tile, int direcao, int tele)
+Tile *proximoTile(Mapa *map, Tile *tile, int direcao)
 {
 	// Verifica se o tile pertence ao mapa
 	if (tile != 0
@@ -207,8 +189,7 @@ Tile *proximoTile(Mapa *map, Tile *tile, int direcao, int tele)
 			&& tile->pos[Y] > -1
 			&& tile->pos[Y] < PAC_MAPA_ALTURA)
 	{
-		// Se o tile possui um teletransporte
-		if (tile->tele && tele) return tile->tele;
+		
 		// Procura o próximo
 		switch (direcao)
 		{
@@ -239,11 +220,11 @@ Tile *proximoTileEm(int passos, Mapa *map, Tile *tile, int direcao)
 	Tile *atual = tile, *proximo = NULL;
 	int i = 1;
 
-	proximo = proximoTile(map, atual, direcao, 0);
+	proximo = proximoTile(map, atual, direcao);
 	while (i < passos && proximo)
 	{
 		atual = proximo;
-		proximo = proximoTile(map, atual, direcao, 0);
+		proximo = proximoTile(map, atual, direcao);
 		i++;
 	}
 

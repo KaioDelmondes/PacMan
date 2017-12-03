@@ -21,5 +21,5 @@ void terminarEspecial(int);
 void moveCursor(int, int, int);
 void teclado(unsigned char, int, int);
 void redimensionar(int, int);
-void escreveTela(char *, int, int, int, int);
 void carregarBitmap(char *, unsigned int, int, int);
+void escreveTela(char *, int, int, int, int);
